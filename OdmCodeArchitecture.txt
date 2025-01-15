@@ -1,0 +1,33 @@
+odm-> CONTAIN PHP CODE
+	1. app
+		->Config
+		|	->Boot
+		|	|	i.   development.php
+		|	|	ii.  production.php
+		|	|	iii. testing.php
+                |       |
+		|	| ->App.php
+		|	| ->Autoload.php
+		|	| ->Cache.php
+		|	| ->Constant.php
+		|	| ->ContentSecurityPolicy.php
+		|	| ->Database.php
+		|	| ->DocTypes.php
+		|	| ->Email.php
+		|	| ->Encryption.php
+			
+		 
+	2. public 		
+	3. system
+	4. tests
+	5. writable
+
+odmnode->
+	1. attachments
+	2. controller
+	3. node_modules
+	4. routes
+	5. services
+	6. Signatures_Files
+	7. upload
+	Js. app_odm

@@ -1,0 +1,62 @@
+Create Sub Client Management
+-----------------------------
+
+
+
+1. Create a new sub menu as Sub-client Management
+	make change in the file V_Nav.php file
+	
+	<!-- Sales Management Start -->
+                    <?php if (count(array_intersect($accessLevelArray, array(10))) > 0) { ?>
+
+                        <a class="nav-link nav-link-collapse collapsed" href="#" data-toggle="collapse" data-target="#collapseLayouts1" aria-expanded="false" aria-controls="collapseLayouts" id="salesMgntBtn">
+                            <div class="sb-nav-link-icon"><i class="fas fa-sharp fa-solid fa-bullhorn"></i></div>
+                            Sales Management
+                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                        </a>
+                        <div class="collapse" id="collapseLayouts1" aria-labelledby="headingOne" data-parent="#sidenavAccordion">
+                            <nav class="sb-sidenav-menu-nested nav">
+                                <?php if (count(array_intersect($accessLevelArray, array(10))) > 0) { ?>
+                                    <button type="button" class="nav-link remove-btn-border" data-toggle="tab" id="clientManagementBtn"><i class="fas fa-regular fa-circle fa-2xs m-2"></i>Client Management</button>
+                                    <button type="button" class="nav-link remove-btn-border" data-toggle="tab" id="subclientManagementBtn"><i class="fas fa-regular fa-circle fa-2xs m-2"></i>Sub-Client Management</button>
+                                <?php } ?>
+                            </nav>
+                        </div>
+                    <?php } ?>
+
+	So that it will create a new sub menu like client management 
+
+	**Code Logic**
+	<?php if (count(array_intersect($accessLevelArray, array(10))) > 0) { ?>
+
+	-> This checks if the current user has access to the "Sales Management" section.
+	-> The array_intersect function:
+		Compares $accessLevelArray (the array of access levels assigned to the user) with an array containing 10.
+		If there’s a match, the user has the required access level.
+	-> count(...) > 0 ensures the intersection is not empty, meaning the user has permission.
+
+
+2. On click this sub-client managementbutoon it will open a new page for that we write a script
+	In the sales_script.js we write a new script for the 
+	
+	**Code Logic**
+	$('#subclientManagementBtn').on('click',function(e){
+    	loadView("sales/NAV_SubClientManagement");
+	})
+
+	$('#subclientManagementBtn'):
+	Selects the HTML element with id="subclientManagementBtn".
+	The $ is a shorthand for jQuery.
+	.on('click', ...):
+	Attaches a click event listener to the selected element. This means that the code inside the function will execute whenever the button is clicked.
+
+
+	loadView("sales/NAV_SubClientManagement");
+	loadView:
+	A custom function (not defined in this snippet). It is likely a part of your application and is used to load a specific view.
+	"sales/NAV_SubClientManagement":
+	A string passed as an argument to loadView. This could represent a path or identifier for the view that should be loaded.
+
+3. On click the sub-client management button their should be a button as AddNewClient button 
+	
+	This code snippet is part of a user interface (UI) where clicking a button triggers the loading of a specific view, likely updating the UI to display content related to "Sub Client Management."

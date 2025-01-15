@@ -1,0 +1,407 @@
+<div class="sales-section card m-4">
+    <div class="card-header client-header">
+        <div class="row">
+            <div class="col-6">
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="client-list-tab" onclick="loadClientsReport();" data-toggle="tab" href="#client-list-section" role="tab" aria-controls="home" aria-selected="true">
+                            <b>Client List</b>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="tab-content">
+    <div id="client-list-section" class="tab-pane active" role="tabpanel">
+        <div class="sales-section card m-4">
+            <!-- Client Contact Details -->
+            <div class="col-md-3 col-sm-12">
+                <div class="form-group">
+                    <label for="client-name">Client Name:<span class="mandatory-info">*</span></label><br>
+                    <input
+                        class="form-control input-sm client-info"
+                        id="myclient-name"
+                        type="text"
+                        onkeyup="this.value = this.value.trimStart().replace(/[^\w\s/\-.,']/g, '').replace(/\s+/g, ' ')"
+                        minlength="1"
+                        maxlength="35"
+                        autocomplete="off"
+                        required
+                    />
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-12">
+                <div class="form-group">
+                    <label for="client-abbreviation">Client Pseudo Name:<span class="mandatory-info">*</span></label><br>
+                    <input
+                        class="form-control input-sm client-info"
+                        id="myclient-abbreviation"
+                        type="text"
+                        onkeyup="this.value = this.value.trimStart().replace(/[^\w\s/\-.,']/g, '').replace(/\s+/g, ' ')"
+                        minlength="1"
+                        maxlength="35"
+                        autocomplete="off"
+                        required
+                    />
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-12">
+                <div class="form-group">
+                    <label for="client-email">Email:<span class="mandatory-info">*</span></label><br>
+                    <input
+                        class="form-control input-sm client-info"
+                        id="myclient-email"
+                        type="email"
+                        maxlength="320"
+                        required
+                    />
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-12">
+                <label for="client-phone">Phone No:</label><br>
+                <div class="d-flex">
+                    <input
+                        class="form-control input-sm client-info"
+                        id="myclient-phone"
+                        type="text"
+                        minlength="5"
+                        maxlength="13"
+                        onkeyup="this.value = this.value.trimStart().replace(/[^0-9]/g, '')"
+                        required
+                    />
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button onclick="clearClientDetailForm()" type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                <button id="save-client-form" type="button" class="btn btn-sm btn-success" onclick="submitClientForm()">Save</button>
+            </div>
+        
+  
+
+<hr>
+<div class="card-header">
+    <div class="row">
+        <div class="col-6">
+            <h6>Client Detail List</h6>
+        </div>
+    </div>
+</div>
+
+<div class="table-responsive Table-Dragable pt-4">
+    <table class="table table-bordered table-striped" id="myclientList">
+        <thead>
+            <tr>
+                <th>Sr No.</th>
+                <th>Client Name</th>
+                <th>Client Pseudo Name</th>
+                <th>Client Email</th>
+                <th>Client Phone</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be dynamically appended here -->
+        </tbody>
+    </table>
+</div>
+
+</div>
+</div>
+//Sub Client Details--------------------------------------------------------------
+
+function submitClientForm() {
+    console.log("Starting submitClientForm...");
+
+    let paramdata = {
+        myclientname: $("#myclient-name").val().trim(),
+        myclientabbreviation: $("#myclient-abbreviation").val().trim(),
+        myclientemail: $("#myclient-email").val().trim(),
+        myclientphone: $("#myclient-phone").val().trim(),
+    };
+
+    console.log("Collected Form Data:", paramdata);
+
+    if (!paramdata.myclientname || !paramdata.myclientemail || !paramdata.myclientphone) {
+        $.notify("Please fill in all required fields!", "error");
+        return;
+    }
+
+    $.ajax({
+        url: hostName + "sales/add-client",
+        method: "POST",
+        data: JSON.stringify(paramdata),
+        contentType: "application/json",
+        beforeSend: function () {
+            console.log("Sending request...");
+        },
+        success: function (res) {
+            console.log("AJAX Success Response:", res);
+            $.notify(res.message || "Client added successfully!", "success");
+        },
+        error: function (err) {
+            console.error("AJAX Error:", err);
+            $.notify(err.responseJSON?.message || "An error occurred.", "error");
+        },
+    });
+}
+
+$('#save-client-form').on('click', function (e) {
+    e.preventDefault(); // Prevent default form submission (if any)
+    loadView("sales/NAV_SubClientManagement");
+
+    // Destroy any existing DataTable instance
+    if ($.fn.DataTable.isDataTable("#clientList"))
+        $("#clientList").DataTable().destroy();
+
+    // Initialize DataTable with new data
+    $("#clientList").DataTable({
+        // Enable searching, scrolling, etc., if needed
+        searching: true,
+        scrollY: "70vh",
+        scrollCollapse: true,
+        fixedHeader: true,
+        scrollX: true,
+        
+        // Fetch data from the backend
+        ajax: {
+            url: hostName + "sales/getClient", // Backend API endpoint
+            type: "GET", // HTTP method
+            data: {
+                loginId: $("#updatedBy").val(),
+                accesslevel: $("#accessLevel").val(),
+            },
+            dataSrc: function (response) {
+                console.log(response);
+                return response; // Ensure this points to your actual data array
+            },
+        },
+
+        // Define columns for the table
+        columns: [
+            { data: "sr_num", title: "Sr No." }, // Serial Number
+            { data: "client_name", title: "Client Name" }, // Client Name
+            { data: "client_abbreviation", title: "Client Pseudo Name" }, // Pseudo Name
+            { data: "client_email", title: "Client Email" }, // Client Email
+            { data: "client_phone", title: "Client Phone" }, // Client Phone
+        ],
+
+        // Optional UI features
+        paging: true, // Enable pagination
+        ordering: true, // Enable column sorting
+        info: true, // Show table information
+    });
+});
+
+
+
+//----------------------------------------------------------------------------
+//------------------function to clear client detail form   //Sub Client details-----------------
+function clearClientDetailForm(callBack) {
+    // Clear all text, email, and phone input fields
+    $("input[type='text'], input[type='email'], input[type='tel']").val("").data("", null);
+
+    // Reset specific data attributes for the inputs
+    $("#myclient-name").val("").attr("data-ClientName", "***").data("ClientName", null);
+    $("#myclient-abbreviation").val("").attr("data-ClientAbbrivation", "***").data("ClientAbbrivation", null);
+    $("#mycontact-email").val("").attr("data-ContactEmailId", "***").data("ContactEmailId", null);
+    $("#myclient-phone").val("").data("ClientPhone", null);
+
+    // Clear dropdowns by setting them to default (empty or first option)
+    $("select").val("");
+
+    // Clear checkboxes and radio buttons
+    $("input[type='checkbox'], input[type='radio']").prop("checked", false);
+
+    // Clear dynamically generated elements (if applicable)
+    $("#newPhoneBoxForClient, #newPhoneBoxForBilling, #newPhoneBoxForContactPer").html("");
+
+    // Optionally reset other custom fields or UI elements (e.g., error messages, spans)
+    $(".error-message").html("");
+    $(".form-control").removeClass("is-invalid is-valid"); // Removes validation classes if applied
+
+    // If a callback function is provided, execute it
+    if (typeof callBack === "function") {
+        callBack();
+    }
+}
+
+//----------------------------
+
+//------------------Sub Client Management-----------------------------
+
+module.exports.addmyNewClient = (req, res) => {
+    console.log("Received Request Body:", req.body);
+
+    const { myclientname, myclientabbreviation, myclientemail, myclientphone } = req.body;
+
+    if (!myclientname || !myclientemail || !myclientphone) {
+        return res.status(400).send({ message: "Client Name, Email, and Phone are required." });
+    }
+
+    const sql=`INSERT INTO Mst_tblsubclinetdetails_Temp (Client_Name, Psudo_Name, Email, myclientphone) values(?, ?, ?, ?)`;
+
+    pool.query(
+        sql,
+        [myclientname, myclientabbreviation || null, myclientemail, myclientphone],
+        (error, result) => {
+            if(error){
+                console.log("Database error:", error);
+                return res.status(500)
+            }
+        }
+    )
+}
+
+
+// module.exports.addmyNewClient = (req, res) => {
+//     console.log("Received Request Body:", req.body);
+
+//     const { myclientname, myclientabbreviation, myclientemail, myclientphone } = req.body;
+
+//     if (!myclientname || !myclientemail || !myclientphone) {
+//         return res.status(400).send({ message: "Client Name, Email, and Phone are required." });
+//     }
+
+//     pool.query(
+//         `CALL Usp_insertclientdetails_temp(?, ?, ?, ?)`,
+//         [myclientname, myclientabbreviation || null, myclientemail, myclientphone],
+//         (error, result) => {
+//             if (error) {
+//                 console.error("Database Error:", error);
+//                 return res.status(500).send({ message: "Database error occurred." });
+//             }
+
+//             const message = result[0]?.[0]?.message || "Unknown response from database.";
+
+//             if (message === "Client already exists") {
+//                 return res.status(200).send({ message });
+//             } else if (message === "New client inserted successfully") {
+//                 return res.status(200).send({ message });
+//             } else {
+//                 return res.status(500).send({ message: "Unexpected response from database." });
+//             }
+//         }
+//     );
+// };
+
+
+module.exports.getClients = (req, res) => {
+    // SQL query to fetch all client data
+    const sql = `SELECT 
+                    ROW_NUMBER() OVER (ORDER BY Client_Name) AS sr_num, 
+                    Client_Name, 
+                    Psudo_Name, 
+                     Email, 
+                    myclientphone 
+                 FROM Mst_tblsubclinetdetails_Temp`;
+
+    // Execute the query
+    pool.query(sql, (error, results) => {
+        if (error) {
+            console.error("Database Error:", error);
+            return res.status(500).send({ message: "Database error occurred." });
+        }
+
+        // Check if results are returned
+        if (results.length === 0) {
+            return res.status(200).send({ message: "No data found.", data: [] });
+        }
+
+        // Map results to a more structured format (optional, based on client-side requirements)
+        const data = results.map((row, index) => ({
+            sr_num: index + 1,
+            client_name: row.client_name,
+            client_pseudoname: row.client_pseudoname,
+            client_email: row.client_email,
+            client_phone: row.client_phone
+        }));
+
+        // Send the results as JSON
+        res.status(200).json({ message: "Data fetched successfully.", data });
+    });
+};
+
+
+//-----------------------------------------------------------------
+
+Routes
+
+var express = require('express');
+var configArr = require('../services/config');
+// var orderMgntController = require('../controller/orderMgnt.controller');
+var salesReportController = require('../controller/salesReport.controller');
+var upload = configArr.upload;
+var router = express.Router();
+
+
+
+
+
+var clientController = require('../controller/salesReport.controller'); 
+
+
+
+router.post("/add-client", salesReportController.addmyNewClient);
+router.get('/sales/getClient', clientController.getClients);
+
+
+
+module.exports = router;
+
+
+//-------------------------------------------------------------------
+
+
+Processure:
+
+BEGIN
+    DECLARE clientExists INT DEFAULT 0;
+
+    SELECT COUNT(*) INTO clientExists
+    FROM Mst_tblsubclinetdetails_Temp
+    WHERE Client_Name = myclientName;
+
+    IF clientExists = 0 THEN
+        INSERT INTO Mst_tblsubclinetdetails_Temp (
+            Client_Name,
+            Psudo_Name,
+            Email,
+            myclientphone
+        )
+        VALUES (
+            myclientName,
+            myclientabbreviation,
+            myclientemail,
+            myclientphone
+        );
+
+        SELECT 'New client inserted successfully' AS message;
+    ELSE
+        SELECT 'Client already exists' AS message;
+    END IF;
+END
+
+
+//------------------------------------Table---------------------------------
+
+CREATE TABLE `Mst_tblsubclinetdetails_Temp` (
+  `Sub_Client_id` int NOT NULL AUTO_INCREMENT,
+  `Client_Name` varchar(65) NOT NULL,
+  `Psudo_Name` varchar(65) NOT NULL,
+  `Email` varchar(65) NOT NULL,
+  `myclientphone` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`Sub_Client_id`),
+  UNIQUE KEY `Email` (`Email`),
+  CONSTRAINT `fk_client_id` FOREIGN KEY (`Sub_Client_id`) REFERENCES `Mst_tblclients` (`Client_id`) ON DELETE CASCADE
+) 
+
+
+
+
+
