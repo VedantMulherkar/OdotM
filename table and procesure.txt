@@ -1,0 +1,88 @@
+Table:
+
+-- Adminer 4.7.7 MySQL dump
+
+SET NAMES utf8;
+SET time_zone = '+00:00';
+SET foreign_key_checks = 0;
+SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
+
+SET NAMES utf8mb4;
+
+DROP TABLE IF EXISTS `Mst_tblsubclinetdetails_Temp`;
+CREATE TABLE `Mst_tblsubclinetdetails_Temp` (
+  `Sub_Client_id` int NOT NULL AUTO_INCREMENT,
+  `Client_Name` varchar(65) NOT NULL,
+  `Psudo_Name` varchar(65) NOT NULL,
+  `Email` varchar(65) NOT NULL,
+  `myclientphone` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`Sub_Client_id`),
+  UNIQUE KEY `Email` (`Email`),
+  CONSTRAINT `fk_client_id` FOREIGN KEY (`Sub_Client_id`) REFERENCES `Mst_tblclients` (`Client_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT INTO `Mst_tblsubclinetdetails_Temp` (`Sub_Client_id`, `Client_Name`, `Psudo_Name`, `Email`, `myclientphone`) VALUES
+(2,	'asdad',	'sadasd',	'asdasd@gmail.com',	NULL),
+(3,	'xts',	'world',	'xtsworld@gmail.com',	NULL),
+(4,	'asdfdsf',	'dfsdfsdf',	'ssf@gmail.com',	'251515151'),
+(5,	'pritesh',	'patil',	'priteshpatil@gmail.com',	'9852631475'),
+(6,	'abc',	'sfds',	'fsdf@gmail.com',	'251521251'),
+(7,	'sfdsfdsf',	'sdfsdfdsf',	'fsdfd@gmail.com',	'1512512512512'),
+(8,	'pritesh',	'priti',	'proitiesh@gmail.com',	'15151212'),
+(10,	'rajnandini',	'rakmkmdf',	'rajnandini@gmail.com',	'745621358945'),
+(12,	'ws',	'dsf',	'fds@gmail.com',	'2545864565456'),
+(27,	'abcde',	'fghij',	'abcdef@gmail.com',	'6545451212222'),
+(29,	'fdfdsfsdfsdf',	'fsdfsdfsdf',	'fsdfsdfsdf@gmail.com',	'1251251251251'),
+(33,	'abcd',	'cdefgs',	'abcdefght@gmail.com',	'7412589632588'),
+(35,	'bamsdbamsndb',	'jgdgadvjsajd',	'jhgasjhdasjd@gmail.com',	'2542542542542'),
+(38,	'dsdss',	'dssdsdd',	'dsdsds@gmail.com',	'6556665467646'),
+(40,	'fsdfsdf',	'dsfsdfsdf',	'sdfsdf@gmail.com',	'2425452425425'),
+(42,	'fsdfdsfdf',	'fsdfdsf',	'jbhb@gmail.com',	'5454545242542'),
+(45,	'fsdfdsfdhsdb',	'fsdfdsfhgsdg',	'jbhb3653@gmail.com',	'5454545245424'),
+(46,	'asdasdsad',	'asdasdasdsad',	'dasdasdsa@xtsworld.in',	'5484242'),
+(48,	'adsds',	'dsdfsdf',	'sdfdsf@gmail.com',	'74384556'),
+(49,	'abcdefg',	'gfedcba',	'abc@gmail.com',	'988256398'),
+(50,	'fsdf',	'sdfsdf',	'fsdfsd@gmail.com',	'945565632'),
+(51,	'sdfsdfsdfdsf',	'dsfdsfsdfd',	'dfsdfdsfsd',	'21512512125'),
+(54,	'sdsadasd',	'dasdasd',	'dsadasd@xtsworld.in',	'35455225112'),
+(56,	'asdasdasd',	'dasdsadasd',	'dasdasd@gmail.com',	'2121228122152'),
+(57,	'dasdasdsd',	'sdasdasd',	'dasdsa@gmail.com',	'2542545242425'),
+(58,	'sdasdasdd',	'sadsadsadsd',	'fsdf@gmail.comd',	'2545864565456'),
+(62,	'asdasdasdds',	'dasdsadsfdfgd',	'ffdfhfghfgh@fhsbfdmhsbf',	'2112525125'),
+(65,	'domo',	'modo',	'domo@gmail.com',	'2545864565456'),
+(68,	'saurab',	'saurba',	'saurab@xtsworld.in',	'215512151'),
+(70,	'sadasd',	'sdsad',	'sdsdasd',	'525151'),
+(72,	'mbsmbmfndsf',	'fsdfsdfd',	'dsfsdfdsf',	'545846442'),
+(75,	'dasdas',	'dasdsad',	'sadsadasdsa',	'2545315152');
+
+-- 2025-01-15 15:00:23
+
+
+Processure
+
+BEGIN
+    DECLARE clientExists INT DEFAULT 0;
+
+    SELECT COUNT(*) INTO clientExists
+    FROM Mst_tblsubclinetdetails_Temp
+    WHERE Client_Name = myclientName;
+
+    IF clientExists = 0 THEN
+        INSERT INTO Mst_tblsubclinetdetails_Temp (
+            Client_Name,
+            Psudo_Name,
+            Email,
+            myclientphone
+        )
+        VALUES (
+            myclientName,
+            myclientabbreviation,
+            myclientemail,
+            myclientphone
+        );
+
+        SELECT 'New client inserted successfully' AS message;
+    ELSE
+        SELECT 'Client already exists' AS message;
+    END IF;
+END

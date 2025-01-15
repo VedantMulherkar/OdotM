@@ -1,0 +1,120 @@
+
+
+
+module.exports.addmyNewClient = (req, res) => {
+    console.log("Received Request Body:", req.body);
+
+    const { myclientname, myclientabbreviation, myclientemail, myclientphone } = req.body;
+
+    if (!myclientname || !myclientemail || !myclientphone) {
+        return res.status(400).send({ message: "Client Name, Email, and Phone are required." });
+    }
+
+    const sql=`INSERT INTO Mst_tblsubclinetdetails_Temp (Client_Name, Psudo_Name, Email, myclientphone) values(?, ?, ?, ?)`;
+
+    pool.query(
+        sql,
+        [myclientname, myclientabbreviation || null, myclientemail, myclientphone],
+        (error, result) => {
+            if(error){
+                console.log("Database error:", error);
+                return res.status(500)
+            }
+        }
+    )
+}
+
+
+// module.exports.addmyNewClient = (req, res) => {
+//     console.log("Received Request Body:", req.body);
+
+//     const { myclientname, myclientabbreviation, myclientemail, myclientphone } = req.body;
+
+//     if (!myclientname || !myclientemail || !myclientphone) {
+//         return res.status(400).send({ message: "Client Name, Email, and Phone are required." });
+//     }
+
+//     pool.query(
+//         `CALL Usp_insertclientdetails_temp(?, ?, ?, ?)`,
+//         [myclientname, myclientabbreviation || null, myclientemail, myclientphone],
+//         (error, result) => {
+//             if (error) {
+//                 console.error("Database Error:", error);
+//                 return res.status(500).send({ message: "Database error occurred." });
+//             }
+
+//             const message = result[0]?.[0]?.message || "Unknown response from database.";
+
+//             if (message === "Client already exists") {
+//                 return res.status(200).send({ message });
+//             } else if (message === "New client inserted successfully") {
+//                 return res.status(200).send({ message });
+//             } else {
+//                 return res.status(500).send({ message: "Unexpected response from database." });
+//             }
+//         }
+//     );
+// };
+
+
+module.exports.getSetClients = (req, res) => {
+    // SQL query to fetch all client data
+    console.log("We reached");
+    const sql = `
+        SELECT 
+            Sub_Client_id AS sr_num, 
+            Client_Name, 
+            Psudo_Name, 
+            Email, 
+            myclientphone
+        FROM Mst_tblsubclinetdetails_Temp`;
+
+    // Execute the query
+    pool.query(sql, (error, results) => {
+        if (error) {
+            console.error("Database Error:", error); // Log detailed error
+            return res.status(500).json({ message: "Database error occurred.", error });
+        }
+
+        // Check if results are returned
+        if (results.length === 0) {
+            console.warn("No data found.");
+            return res.status(200).json({ message: "No data found.", data: [] });
+        }
+
+        // Map results to a more structured format
+        const data = results.map((row) => ({
+            sr_num: row.sr_num,
+            client_name: row.Client_Name,
+            client_pseudoname: row.Psudo_Name,
+            client_email: row.Email,
+            client_phone: row.myclientphone
+        }));
+
+        console.log("Data fetched successfully:", data); // Debug data
+        res.status(200).json({ message: "Data fetched successfully.", data });
+    });
+};
+
+module.exports.deleteClient = (req, res) => {
+    const clientId = req.params.id;
+
+    if (!clientId) {
+        return res.status(400).json({ message: "Client ID is required." });
+    }
+
+    const sql = `DELETE FROM Mst_tblsubclinetdetails_Temp WHERE Sub_Client_id = ?`;
+
+    pool.query(sql, [clientId], (error, results) => {
+        if (error) {
+            console.error("Database Error:", error);
+            return res.status(500).json({ message: "Database error occurred.", error });
+        }
+
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ message: "Client not found." });
+        }
+
+        res.status(200).json({ message: "Client deleted successfully." });
+    });
+};

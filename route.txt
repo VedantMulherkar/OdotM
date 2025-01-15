@@ -1,0 +1,26 @@
+var express = require('express');
+var configArr = require('../services/config');
+// var orderMgntController = require('../controller/orderMgnt.controller');
+var salesReportController = require('../controller/salesReport.controller');
+var upload = configArr.upload;
+var router = express.Router();
+
+
+
+
+var clientController = require('../controller/salesReport.controller'); 
+
+
+router.get('/getSetClients', (req, res) => { salesReportController.getSetClients(req, res); });
+
+
+
+
+
+
+router.delete('/deleteClient/:id', clientController.deleteClient);
+router.post("/add-client", salesReportController.addmyNewClient);
+
+
+
+module.exports = router;

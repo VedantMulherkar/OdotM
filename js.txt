@@ -1,0 +1,173 @@
+
+
+function clearClientDetailForm(callBack) {
+  // Clear all text, email, and phone input fields
+  $("input[type='text'], input[type='email'], input[type='tel']")
+    .val("")
+    .data("", null);
+
+  // Reset specific data attributes for the inputs
+  $("#myclient-name")
+    .val("")
+    .attr("data-ClientName", "***")
+    .data("ClientName", null);
+  $("#myclient-abbreviation")
+    .val("")
+    .attr("data-ClientAbbrivation", "***")
+    .data("ClientAbbrivation", null);
+  $("#mycontact-email")
+    .val("")
+    .attr("data-ContactEmailId", "***")
+    .data("ContactEmailId", null);
+  $("#myclient-phone").val("").data("ClientPhone", null);
+
+  // Clear dropdowns by setting them to default (empty or first option)
+  $("select").val("");
+
+  // Clear checkboxes and radio buttons
+  $("input[type='checkbox'], input[type='radio']").prop("checked", false);
+
+  // Clear dynamically generated elements (if applicable)
+  $(
+    "#newPhoneBoxForClient, #newPhoneBoxForBilling, #newPhoneBoxForContactPer"
+  ).html("");
+
+  // Optionally reset other custom fields or UI elements (e.g., error messages, spans)
+  $(".error-message").html("");
+  $(".form-control").removeClass("is-invalid is-valid"); // Removes validation classes if applied
+
+  // If a callback function is provided, execute it
+  if (typeof callBack === "function") {
+    callBack();
+  }
+}
+
+
+
+let isSubmitButtonClicked = false;
+function submitClientForm() {
+  isSubmitButtonClicked = true;
+  $("#generate-client-form").prop("disabled", false);
+  console.log("Starting submitClientForm...");
+ 
+  let paramdata = {
+    myclientname: $("#myclient-name").val().trim(),
+    myclientabbreviation: $("#myclient-abbreviation").val().trim(),
+    myclientemail: $("#myclient-email").val().trim(),
+    myclientphone: $("#myclient-phone").val().trim(),
+  };
+
+  console.log("Collected Form Data:", paramdata);
+
+  if (
+    !paramdata.myclientname ||
+    !paramdata.myclientemail ||
+    !paramdata.myclientphone
+  ) {
+    $.notify("Please fill in all required fields!", "error");
+    return;
+  }
+
+  $.ajax({
+    url: hostName + "sales/add-client",
+    method: "POST",
+    data: JSON.stringify(paramdata),
+    contentType: "application/json",
+    beforeSend: function () {
+      console.log("Sending request...");
+    },
+    success: function (res) {
+      console.log("AJAX Success Response:", res);
+      $.notify(res.message || "Client added successfully!", "success");
+    },
+    error: function (err) {
+      console.error("AJAX Error:", err);
+      $.notify(err.responseJSON?.message || "An error occurred.", "error");
+    },
+  });
+
+
+}
+
+
+
+function viewClientForm() {
+    // Enable the delete and update buttons after viewing data
+    if (isSubmitButtonClicked) {
+        $("#delete-client-form").prop("disabled", false);
+        $("#update-client-form").prop("disabled", false);
+    }
+
+    // Destroy any existing DataTable instance to reset the table
+    if ($.fn.DataTable.isDataTable("#clientdetails")) {
+        $("#clientdetails").DataTable().destroy();
+    }
+
+    // Initialize DataTable
+    $("#clientdetails").DataTable({
+        ajax: {
+            url: hostName + "sales/getSetClients",
+            type: "GET",
+            dataSrc: function(response) {
+                console.log("AJAX Success Response:", response);
+                if (response && response.data) {
+                    return response.data;
+                } else {
+                    console.warn("No data found in the response");
+                    return [];
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX Error:", error);
+                console.error("Status:", status);
+                console.error("Response Text:", xhr.responseText);
+                alert("Error fetching client data: " + error);
+            }
+        },
+        columns: [
+            { data: "sr_num", title: "Sr No." },
+            { data: "client_name", title: "Client Name" },
+            { data: "client_pseudoname", title: "Client Pseudo Name" },
+            { data: "client_email", title: "Client Email" },
+            { data: "client_phone", title: "Client Phone" }
+        ],
+        paging: true,
+        ordering: true,
+        info: true
+    });
+
+    $("#clientdetails").on("click", "#delete-client-form", function () {
+      const clientId = $(this).data("sr_num");
+      deleteClientForm(clientId);
+    });
+}
+
+
+
+
+// Delete Button Handler
+function deleteClientForm(clientId) {
+
+  if (confirm("Are you sure you want to delete this client?")) {
+    $.ajax({
+        url: hostName + "sales/deleteClient/" + clientId,
+        type: "DELETE",
+        success: function (response) {
+            alert(response.message);
+            $("#clientdetails").DataTable().ajax.reload(); // Reload DataTable
+        },
+        error: function (xhr, status, error) {
+            console.error("Delete Error:", error);
+            alert("Error deleting client: " + error);
+        },
+    });
+}
+
+}
+// Update Button Handler
+$("#update-client-form").on("click", function (e) {
+  console.log("deleted");
+  return;
+
+});
+
